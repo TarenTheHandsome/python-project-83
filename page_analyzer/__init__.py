@@ -1,5 +1,5 @@
-from page_analyzer.app import hello, app
+from page_analyzer.app import app
 
 __all__ = (
-    "hello", "app"
+     "app"
 )
