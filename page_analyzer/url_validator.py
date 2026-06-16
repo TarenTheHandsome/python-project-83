@@ -1,17 +1,25 @@
 from urllib.parse import urlparse
-def validator(url):
-    errors = {}
-    if len(url) == 0:
-        errors['url'] = 'Url не должен быть пустым'
-    if len(url) > 255:
-        errors['url'] = 'Url не должен быть длиннее 255 символов'
 
-    return errors
-    
-    # 
-    # try:
-    #     result = urlparse(url)
-    #     # Проверяем наличие схемы (http/https) и домена (netloc)
-    #     return all([result.scheme, result.netloc])
-    # except ValueError:
-    #     return False
+def normalize_url(url):
+    return f'{urlparse(url).scheme}://{urlparse(url).hostname}'
+def validator(url):
+    errors = set()
+    errors.add(bool(url))
+    errors.add((bool(urlparse(url).scheme)))
+    errors.add((bool(urlparse(url).netloc)))
+    if len(url) > 255:
+        errors.add(False)
+    if False in errors:
+        return True
+    return False
+
+print(normalize_url('https://github.com/TarenTheHandsome/python-project-83/settings/secrets/actions'))
+
+# print(validator("https://www.google.com/search?q=%D0%BA%D0%B0%D0%BA+%D0%BF%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B8%D1%82%D1%8C+%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BF%D1%80%D0%B5%D1%82%D0%B0%D1%82%D0%BE%D1%80+%D0%B8%D0%B7+%D0%BE%D0%BA%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F&newwindow=1&sca_esv=af48876c36cb3322&biw=1440&bih=667&sxsrf=ANbL-n6BAEQgYN_8l5WprWrS_3Eju8IHCg%3A1777283109665&ei=JTDvafKqKNfY7M8PjIquuQ4&ved=0ahUKEwiy0arD342UAxVXLPsDHQyFK-cQ4dUDCBE&uact=5&oq=%D0%BA%D0%B0%D0%BA+%D0%BF%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B8%D1%82%D1%8C+%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BF%D1%80%D0%B5%D1%82%D0%B0%D1%82%D0%BE%D1%80+%D0%B8%D0%B7+%D0%BE%D0%BA%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F&gs_lp=Egxnd3Mtd2l6LXNlcnAiTtC60LDQuiDQv9C-0LTQutC70Y7Rh9C40YLRjCDQuNC90YLQtdGA0L_RgNC10YLQsNGC0L7RgCDQuNC3INC-0LrRgNGD0LbQtdC90LjRjzIFECEYoAEyBRAhGKABSJFdUOsGWLhXcAR4AZABAJgBzAKgAZEtqgEIMC4zOC4wLjG4AQPIAQD4AQGYAiugArUwqAIUwgIKEAAYRxjWBBiwA8ICBxAjGOoCGCfCAhAQLhgDGI8BGOoCGLQC2AEBwgIQEAAYAxiPARjqAhi0AtgBAcICBBAjGCfCAgoQIxiABBiKBRgnwgIKEAAYgAQYigUYQ8ICCxAAGIAEGLEDGIMBwgIFEAAYgATCAggQABiABBixA8ICCxAAGIAEGIoFGLEDwgIOEAAYgAQYigUYsQMYgwHCAggQLhiABBixA8ICBhAAGBYYHsICBRAAGO8FwgIFECEYnwWYAxPxBSFWpcTNXCCjiAYBkAYIugYGCAEQARgKkgcINC4zOC4wLjGgB7-XArIHCDAuMzguMC4xuAfUL8IHCzAuMi4yNy4xMy4xyAe8AoAIAQ&sclient=gws-wiz-serp"))
+# print(validator('url'))
+# print(validator('https://ru.hexlet.io/programs/python'))
+# print(validator(''))
+# print(validator('lalalallalalalalallalalallalallalalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalallalalalalallalalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalallalallalalalkjklkjhgfdssdfghjklkjhgfdfghjklalalkjklkjhgfdssdfghjklkjhgfdfghjk'))
+
+# errors = validator('1')
+# print(errors)

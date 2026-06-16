@@ -10,21 +10,19 @@
 </head>
 
 <body>
-    <form action="/" method="post">
-      <header>
-            <nav>
-                  <ul>
-                        <li><a href="#">Анализатор страниц</a></li>
-                        <li><a href="#">Сайты</a></li>
-                  </ul>
-            </nav>
-      </header>
+{% include 'header.html'%}
+
+        <figure class="text-center">
       <h1>Анализатор страниц</h1>
-      <p>Бесплатно проверяйте сайты на SEO-пригодность</p>
-      <form>
-            <input type="text" name="url" value="{{ request.form.url|default('') }}">
-            <button type="submit">Отправить</button>
+            <h2><small class="text-muted">Бесплатно проверяйте сайты на SEO-пригодность</small></h2>
+      <form action="{{ url_for('post_url') }}" method="post">
+            <input type="text" name="url" size="65" placeholder="https://www.exemple.com" value="{{ request.form.url|default('') }}">
+            <button class="btn btn-primary" type="submit">Проверить</button>
+
       </form>
+        </figure>
+            
     </form>
+
 </body>
 </html>

@@ -1,5 +1,18 @@
 import os
 # from url_validator import validator
+import datetime
+from urllib.parse import urlparse
+import psycopg2
+import os
+from dotenv import load_dotenv
+# from database import add_data
+load_dotenv()
+DATABASE_URL = os.getenv('DATABASE_URL')
+conn = psycopg2.connect(DATABASE_URL)
+from psycopg2.extras import RealDictCursor
+
+
+
 from flask import (
     Flask,
     flash,
@@ -11,36 +24,125 @@ from flask import (
     url_for,
 )
 
-def validator(url):
-    errors = {}
-    if len(url) == 0:
-        errors['url'] = 'Url не должен быть пустым'
-    if len(url) > 255:
-        errors['url'] = 'Url не должен быть длиннее 255 символов'
+###DATABASE###
+class Validator:
+    def __init__(self):
+        self.tables = {'urls', 'url_checks'}
+        self.orders = {'ASC', 'DESC'}
 
-    return errors
+    def table_validator(self, table):
+        if table in self.tables:
+            return False
+        return True
+
+    def order_validator(self, order):
+        if order in self.orders:
+            return False
+        return True
+
+
+def add_data(url, created_date):
+    sql = f'INSERT INTO urls (name, created_at) VALUES (%(url)s, %(created_at)s);'
+    with conn.cursor() as curs:
+        curs.execute(sql, {'url': url, 'created_at': created_date})
+    conn.commit()
+
+
+def get_data(table=None, order='ASC', id=None):
+    v = Validator()
+    if not table or v.table_validator(table):
+        raise ValueError(f"Invalid table name. Allowed: {v.tables}")
+
+    order = order.upper()
+    if v.order_validator(order):
+        raise ValueError(f"Invalid table order. Allowed: {v.tables}")
+    where = ''
+    id_dict = {}
+    if id:
+        where = 'WHERE id = %(id)s'
+        id_dict = {'id': id}
+    sql = f"SELECT * FROM {table} {where} ORDER BY id {order}"
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, id_dict)
+        # if id:
+        #     return curs.fetchone()
+        # # data = curs.fetchall()
+
+        return curs.fetchall()
+
+def get_check(url_id):
+    sql = f"SELECT * FROM url_checks WHERE url_id = %(url_id)s"
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, {'url_id': url_id})
+        return curs.fetchall()
+
+def select_id(id):
+    sql = 'SELECT * FROM urls WHERE id = %(id)s;'
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, {'id': id})
+        url = curs.fetchone()
+    return url
+
+###DATADASE###
+
+###VALIDATOR###
+def validator(url):
+    errors = set()
+    errors.add(bool(url))
+    errors.add((bool(urlparse(url).scheme)))
+    errors.add((bool(urlparse(url).netloc)))
+    if len(url) > 255:
+        errors.add(False)
+    if False in errors:
+        return True
+    return False
+
+###VALIDAROR###
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
 
-DATA = []
 
 @app.route('/')
 def hello():
     return render_template('start_page.html')
 
-@app.get('/url_list')
-def get_url_list():
-    return DATA
-
 @app.post('/')
 def post_url():
-    url = request.form.to_dict()
-    errors = validator(url['url'])
-    if errors:
-        return 'Error'
-    print(url)
-    DATA.append(url)
+    form_data = request.form.to_dict()
+    url = form_data.get('url')
+    datatime = datetime.date.today()
+    error = validator(url)
+    if error:
+        return render_template('error.html'), 422
+    #соединение с ДБ
+    add_data(f'{urlparse(url).scheme}://{urlparse(url).hostname}', datatime)
     flash('S', 'success')
     resp = make_response(redirect(url_for('get_url_list')))
     return resp
+
+@app.route('/header')
+def header():
+    return render_template('header.html')
+
+@app.get('/urls')
+def get_url_list():
+    all_urls = get_data('urls', 'DESC')
+    return render_template('urls.html', all_urls=all_urls)
+
+@app.get('/url/<id>')
+def get_id(id):
+    url = select_id(id)
+    return render_template('url.html', url=url)
+
+@app.route('/urls/<id>/checks', methods=['GET', 'POST'])
+def check(id):
+    all_checks = get_check(id)
+    url = select_id(id)
+    return render_template('check_button.html', all_checks=all_checks, url=url)
+
+
+# @app.post('urls/<id>/checks')
+# def check_url(id):
+#     return None
+
