@@ -14,7 +14,10 @@
   {% include 'url.html'%}
     <div class="container">
         <h1>Проверки</h1>
-  <button type="button" class="btn btn-primary btn-lg">Запустить проверку</button>
+        <form action="/urls/{{ all_checks.id }}/checks" method="post">
+            <button type="button" class="btn btn-primary btn-lg">Запустить проверку</button>
+        </form>
+  
         <div class="container">
           <div class="row">
               <div class="col">
@@ -29,15 +32,15 @@
                           <th>Дата создания</th>
                       </tr>
                       </thead>
-                      {% for data in all_checks %}
+                      {% for check in all_checks %}
                       <tbody>
                       <tr>
-                          <td>{{ data.id }}</td>
-                          <td>{{ data.url_id }}</td>
-                          <td>{{ data.status_code }}</td>
-                          <td>{{ data.title }}</td>
-                          <td>{{ data.description }}</td>
-                          <td>{{ data.created_at }}</td>
+                          <td>{{ check.url_id }}</td>
+                          <td>{{ check.status_code }}</td>
+                          <td>Kim Kitsuragi</td>
+                          <td>{{ check.title }}</td>
+                          <td>{{ check.description }}</td>
+                          <td>{{ check.created_at }}</td>
                       </tr>
                       </tbody>
                       {% endfor %}

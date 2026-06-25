@@ -1,5 +1,6 @@
 import os
 # from url_validator import validator
+import requests
 import datetime
 from urllib.parse import urlparse
 import psycopg2
@@ -40,14 +41,6 @@ class Validator:
             return False
         return True
 
-
-def add_data(url, created_date):
-    sql = f'INSERT INTO urls (name, created_at) VALUES (%(url)s, %(created_at)s);'
-    with conn.cursor() as curs:
-        curs.execute(sql, {'url': url, 'created_at': created_date})
-    conn.commit()
-
-
 def get_data(table=None, order='ASC', id=None):
     v = Validator()
     if not table or v.table_validator(table):
@@ -56,19 +49,27 @@ def get_data(table=None, order='ASC', id=None):
     order = order.upper()
     if v.order_validator(order):
         raise ValueError(f"Invalid table order. Allowed: {v.tables}")
+
     where = ''
     id_dict = {}
     if id:
-        where = 'WHERE id = %(id)s'
-        id_dict = {'id': id}
+        if table == 'url_checks':
+            where = 'WHERE url_id = %(url_id)s'
+            id_dict = {'url_id': id}
+        elif table == 'urls':
+            where = 'WHERE id = %(id)s'
+            id_dict = {'id': id}
     sql = f"SELECT * FROM {table} {where} ORDER BY id {order}"
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, id_dict)
-        # if id:
-        #     return curs.fetchone()
-        # # data = curs.fetchall()
 
         return curs.fetchall()
+
+def add_data(url, created_date):
+    sql = f'INSERT INTO urls (name, created_at) VALUES (%(url)s, %(created_at)s);'
+    with conn.cursor() as curs:
+        curs.execute(sql, {'url': url, 'created_at': created_date})
+    conn.commit()
 
 def get_check(url_id):
     sql = f"SELECT * FROM url_checks WHERE url_id = %(url_id)s"
@@ -82,6 +83,20 @@ def select_id(id):
         curs.execute(sql, {'id': id})
         url = curs.fetchone()
     return url
+
+def get_url(id):
+    sql = f"SELECT name FROM urls WHERE id = %(id)s"
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, {'id': id})
+        return curs.fetchone().get('name')
+    
+def add_url_check(url_id, status_code):
+    datatime = datetime.date.today()
+    sql = f'INSERT INTO url_checks (url_id, status_code, created_at )' \
+          f' VALUES (%(url_id)s, %(status_code)s, %(created_at)s);'
+    with conn.cursor() as curs:
+        curs.execute(sql, {'url_id': url_id, 'status_code': status_code, 'created_at': datatime})
+    conn.commit()
 
 ###DATADASE###
 
@@ -132,17 +147,23 @@ def get_url_list():
 
 @app.get('/url/<id>')
 def get_id(id):
-    url = select_id(id)
-    return render_template('url.html', url=url)
+    all_urls = get_data('urls', 'ASC', id)
+    return render_template('url.html', all_urls=all_urls)
 
 @app.route('/urls/<id>/checks', methods=['GET', 'POST'])
 def check(id):
-    all_checks = get_check(id)
-    url = select_id(id)
-    return render_template('check_button.html', all_checks=all_checks, url=url)
+    name = get_url(id)
+    try:
+        requests.get(name).raise_for_status()
+    except:
+        flash('Произошла ошибка при проверке')
+
+    status = requests.get(name)
+    add_url_check(id, status.status_code)
+    all_checks = get_data('url_checks', 'ASC', id)
+    all_urls = get_data('urls', 'ASC', id)
+    return render_template('check_button.html', all_checks=all_checks, all_urls=all_urls)
 
 
-# @app.post('urls/<id>/checks')
-# def check_url(id):
-#     return None
+
 
