@@ -9,81 +9,45 @@ conn = psycopg2.connect(DATABASE_URL)
 from psycopg2.extras import RealDictCursor
 
 
-
-
-
-class Validator:
-    def __init__(self):
-        self.tables = {'urls', 'url_checks'}
-        self.orders = {'ASC', 'DESC'}
-        self.elements = [{'urls': ''}, {'url_checks': ''}]
-
-    def table_validator(self, table):
-        if table in self.tables:
-            return False
-        return True
-
-    def order_validator(self, order):
-        if order in self.orders:
-            return False
-        return True
-
-
-def validator(table, order):
-    v = Validator()
-    errors = []
-    if not table or v.table_validator(table):
-        errors.append(True)
-        raise ValueError(f"Invalid table name. Allowed: {v.tables}")
-
-    order = order.upper()
-    if v.order_validator(order):
-        errors.append(True)
-        raise ValueError(f"Invalid table order. Allowed: {v.tables}")
-    return errors
-
-
-#Достает строчку или строчки из обеих таблиц
-def get_data(table=None, order='ASC', id=None):
-    if validator(table, order):
-        raise ValueError(f"Invalid data")
-    where = ''
-    id_dict = {}
-    if id:
-        if table == 'url_checks':
-            where = 'WHERE url_id = %(url_id)s'
-            id_dict = {'url_id': id}
-        elif table == 'urls':
-            where = 'WHERE id = %(id)s'
-            id_dict = {'id': id}
-    sql = f"SELECT * FROM {table} {where} ORDER BY id {order}"
-    print(sql)
+#достает все записи из таблицы urls
+def get_all_urls():
+    sql = f"SELECT * FROM urls ORDER BY id DESC"
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
-        curs.execute(sql, id_dict)
-
+        curs.execute(sql)
         return curs.fetchall()
-    
 
-#Достает позицию из любой таблицы по id/url_id
-def get_element(table, element, id):
-    if validator(table, id):
-        raise ValueError(f"Invalid data")
+
+#достает строчку по id из таблицы urls
+def get_string_by_id(id):
+    sql = f"SELECT * FROM urls WHERE id = %(id)s"
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, {'id': id})
+        return curs.fetchall()
+
+
+#достает строчку по url_id из таблицы url_checks
+def get_string_by_url_id(url_id):
+    sql = f"SELECT * FROM url_checks WHERE url_id = %(url_id)s"
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, {'url_id': url_id})
+        return curs.fetchall()
+
+
+#достает название сайта по id из таблицы urls
+def get_url(id):
     sql = f"SELECT name FROM urls WHERE id = %(id)s"
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'id': id})
-        name = curs.fetchone().get('name')
-    status = requests.get(name)
-    return status.status_code
+        return curs.fetchone().get('name')
 
-#Добавляет url в таблицу urls
-def add_data(url):
-    datatime = datetime.date.today()
+
+def add_data_into_urls(url, created_date):
     sql = f'INSERT INTO urls (name, created_at) VALUES (%(url)s, %(created_at)s);'
     with conn.cursor() as curs:
-        curs.execute(sql, {'url': url, 'created_at': datatime})
+        curs.execute(sql, {'url': url, 'created_at': created_date})
     conn.commit()
 
-#Добавляет status_code в таблицу url_checks
+
 def add_url_check(url_id, status_code):
     datatime = datetime.date.today()
     sql = f'INSERT INTO url_checks (url_id, status_code, created_at )' \
@@ -92,3 +56,47 @@ def add_url_check(url_id, status_code):
         curs.execute(sql, {'url_id': url_id, 'status_code': status_code, 'created_at': datatime})
     conn.commit()
 
+
+
+
+#Добавляет url в таблицу urls
+def add_data(url, created_date):
+    sql = f'INSERT INTO urls (name, created_at) VALUES (%(url)s, %(created_at)s);'
+    with conn.cursor() as curs:
+        curs.execute(sql, {'url': url, 'created_at': created_date})
+    conn.commit()
+
+#Добавляет status_code в таблицу url_checks
+
+
+
+# def get_check(url_id):
+#     sql = f"SELECT * FROM url_checks WHERE url_id = %(url_id)s"
+#     with conn.cursor(cursor_factory=RealDictCursor) as curs:
+#         curs.execute(sql, {'url_id': url_id})
+#         return curs.fetchall()
+
+
+# def select_id(id):
+#     sql = 'SELECT * FROM urls WHERE id = %(id)s;'
+#     with conn.cursor(cursor_factory=RealDictCursor) as curs:
+#         curs.execute(sql, {'id': id})
+#         url = curs.fetchone()
+#     return url
+
+# def add_url_check(url_id, status_code):
+#     datatime = datetime.date.today()
+#     sql = f'INSERT INTO url_checks (url_id, status_code, created_at )' \
+#           f' VALUES (%(url_id)s, %(status_code)s, %(created_at)s);'
+#     with conn.cursor() as curs:
+#         curs.execute(sql, {'url_id': url_id, 'status_code': status_code, 'created_at': datatime})
+#     conn.commit()
+
+#Достает позицию из любой таблицы по id/url_id
+# def get_element(table, element, id):
+#     sql = f"SELECT name FROM urls WHERE id = %(id)s"
+#     with conn.cursor(cursor_factory=RealDictCursor) as curs:
+#         curs.execute(sql, {'id': id})
+#         name = curs.fetchone().get('name')
+#     status = requests.get(name)
+#     return status.status_code

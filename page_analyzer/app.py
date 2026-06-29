@@ -1,17 +1,18 @@
 import os
-# from url_validator import validator
 import requests
 import datetime
 from urllib.parse import urlparse
 import psycopg2
 import os
 from dotenv import load_dotenv
-# from database import add_data
 load_dotenv()
-DATABASE_URL = os.getenv('DATABASE_URL')
-conn = psycopg2.connect(DATABASE_URL)
-from psycopg2.extras import RealDictCursor
-
+from page_analyzer.url_validator import validator
+from page_analyzer.database import add_data_into_urls
+from page_analyzer.database import get_url
+from page_analyzer.database import add_url_check
+from page_analyzer.database import get_all_urls
+from page_analyzer.database import get_string_by_id
+from page_analyzer.database import get_string_by_url_id
 
 
 from flask import (
@@ -25,94 +26,6 @@ from flask import (
     url_for,
 )
 
-###DATABASE###
-class Validator:
-    def __init__(self):
-        self.tables = {'urls', 'url_checks'}
-        self.orders = {'ASC', 'DESC'}
-
-    def table_validator(self, table):
-        if table in self.tables:
-            return False
-        return True
-
-    def order_validator(self, order):
-        if order in self.orders:
-            return False
-        return True
-
-def get_data(table=None, order='ASC', id=None):
-    v = Validator()
-    if not table or v.table_validator(table):
-        raise ValueError(f"Invalid table name. Allowed: {v.tables}")
-
-    order = order.upper()
-    if v.order_validator(order):
-        raise ValueError(f"Invalid table order. Allowed: {v.tables}")
-
-    where = ''
-    id_dict = {}
-    if id:
-        if table == 'url_checks':
-            where = 'WHERE url_id = %(url_id)s'
-            id_dict = {'url_id': id}
-        elif table == 'urls':
-            where = 'WHERE id = %(id)s'
-            id_dict = {'id': id}
-    sql = f"SELECT * FROM {table} {where} ORDER BY id {order}"
-    with conn.cursor(cursor_factory=RealDictCursor) as curs:
-        curs.execute(sql, id_dict)
-
-        return curs.fetchall()
-
-def add_data(url, created_date):
-    sql = f'INSERT INTO urls (name, created_at) VALUES (%(url)s, %(created_at)s);'
-    with conn.cursor() as curs:
-        curs.execute(sql, {'url': url, 'created_at': created_date})
-    conn.commit()
-
-def get_check(url_id):
-    sql = f"SELECT * FROM url_checks WHERE url_id = %(url_id)s"
-    with conn.cursor(cursor_factory=RealDictCursor) as curs:
-        curs.execute(sql, {'url_id': url_id})
-        return curs.fetchall()
-
-def select_id(id):
-    sql = 'SELECT * FROM urls WHERE id = %(id)s;'
-    with conn.cursor(cursor_factory=RealDictCursor) as curs:
-        curs.execute(sql, {'id': id})
-        url = curs.fetchone()
-    return url
-
-def get_url(id):
-    sql = f"SELECT name FROM urls WHERE id = %(id)s"
-    with conn.cursor(cursor_factory=RealDictCursor) as curs:
-        curs.execute(sql, {'id': id})
-        return curs.fetchone().get('name')
-    
-def add_url_check(url_id, status_code):
-    datatime = datetime.date.today()
-    sql = f'INSERT INTO url_checks (url_id, status_code, created_at )' \
-          f' VALUES (%(url_id)s, %(status_code)s, %(created_at)s);'
-    with conn.cursor() as curs:
-        curs.execute(sql, {'url_id': url_id, 'status_code': status_code, 'created_at': datatime})
-    conn.commit()
-
-###DATADASE###
-
-###VALIDATOR###
-def validator(url):
-    errors = set()
-    errors.add(bool(url))
-    errors.add((bool(urlparse(url).scheme)))
-    errors.add((bool(urlparse(url).netloc)))
-    if len(url) > 255:
-        errors.add(False)
-    if False in errors:
-        return True
-    return False
-
-###VALIDAROR###
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
@@ -131,7 +44,7 @@ def post_url():
     if error:
         return render_template('error.html'), 422
     #соединение с ДБ
-    add_data(f'{urlparse(url).scheme}://{urlparse(url).hostname}', datatime)
+    add_data_into_urls(f'{urlparse(url).scheme}://{urlparse(url).hostname}', datatime)
     flash('S', 'success')
     resp = make_response(redirect(url_for('get_url_list')))
     return resp
@@ -142,12 +55,12 @@ def header():
 
 @app.get('/urls')
 def get_url_list():
-    all_urls = get_data('urls', 'DESC')
+    all_urls = get_all_urls()
     return render_template('urls.html', all_urls=all_urls)
 
 @app.get('/url/<id>')
 def get_id(id):
-    all_urls = get_data('urls', 'ASC', id)
+    all_urls = get_string_by_id(id)
     return render_template('url.html', all_urls=all_urls)
 
 @app.route('/urls/<id>/checks', methods=['GET', 'POST'])
@@ -160,10 +73,7 @@ def check(id):
 
     status = requests.get(name)
     add_url_check(id, status.status_code)
-    all_checks = get_data('url_checks', 'ASC', id)
-    all_urls = get_data('urls', 'ASC', id)
+    all_checks = get_string_by_url_id(id)
+    all_urls = get_string_by_id(id)
     return render_template('check_button.html', all_checks=all_checks, all_urls=all_urls)
-
-
-
 
