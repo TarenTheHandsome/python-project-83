@@ -14,10 +14,9 @@
   {% include 'url.html'%}
     <div class="container">
         <h1>Проверки</h1>
-        <form action="/urls/{{ all_checks.id }}/checks" method="post">
-            <button type="button" class="btn btn-primary btn-lg">Запустить проверку</button>
+        <form method="post" action="/urls/{{ id }}/checks">
+            <button type="submit" class="btn btn-primary btn-lg">Запустить проверку</button>
         </form>
-  
         <div class="container">
           <div class="row">
               <div class="col">
@@ -35,17 +34,19 @@
                       {% for check in all_checks %}
                       <tbody>
                       <tr>
-                          <td>{{ check.url_id }}</td>
+                          <td>{{ check.id }}</td>
                           <td>{{ check.status_code }}</td>
-                          <td>Kim Kitsuragi</td>
-                          <td>{{ check.title }}</td>
-                          <td>{{ check.description }}</td>
+                          <td class="text-wrap">{{ check.h1 }}</td>
+                          <td class="text-wrap">{{ check.title }}</td>
+                          <td class="text-wrap">{{ check.description }}</td>
                           <td>{{ check.created_at }}</td>
                       </tr>
                       </tbody>
                       {% endfor %}
-                      
-        
+              </div>    
+          
+          </div>            
+        </div>
     </div>
   
 </form>

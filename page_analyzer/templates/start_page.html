@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Подключение Bootstrap</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подключение Bootstrap</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </head>
 
 <body>
-{% include 'header.html'%}
+    {% include 'header.html' %}
 
-        <figure class="text-center">
-      <h1>Анализатор страниц</h1>
-            <h2><small class="text-muted">Бесплатно проверяйте сайты на SEO-пригодность</small></h2>
-      <form action="{{ url_for('post_url') }}" method="post">
-            <input type="text" name="url" size="65" placeholder="https://www.exemple.com" value="{{ request.form.url|default('') }}">
-            <button class="btn btn-primary" type="submit">Проверить</button>
-
-      </form>
-        </figure>
-            
-    </form>
-
+    <div class="container mt-4">
+        <div class="p-4 bg-light rounded-0 text-center mx-auto" style="max-width: 700px;">
+            <h1>Анализатор страниц</h1>
+            <h4><small class="text-muted">Бесплатно проверяйте сайты на SEO-пригодность</small></h4>
+            <form action="{{ url_for('post_url') }}" method="post">
+                <input type="text" name="url" size="50" placeholder="https://www.exemple.com" value="{{ request.form.url|default('') }}">
+                <button class="btn btn-primary" type="submit">Проверить</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
