@@ -9,8 +9,16 @@ from psycopg2.extras import RealDictCursor
 
 #достает все записи из таблицы urls
 def get_all_urls():
-    # добавить сюда статус код
-    sql = f"SELECT * FROM urls ORDER BY id DESC"
+    sql = '''
+    SELECT DISTINCT ON (urls.id)
+    urls.id, 
+    urls.name,
+    url_checks.created_at, 
+    url_checks.status_code
+    FROM urls
+    LEFT JOIN url_checks ON urls.id = url_checks.url_id
+    ORDER BY urls.id, url_checks.created_at DESC;
+    '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql)
         return curs.fetchall()
@@ -48,7 +56,6 @@ def add_data_into_urls(url):
     conn.commit()
 
 
-
 #Добавляет информацию в таблицу url_check
 def add_data_in_url_check(url_id, status_code, h1, title, description):
     sql = f'INSERT INTO url_checks (url_id, status_code, h1, title, description)' \
@@ -62,3 +69,10 @@ def add_data_in_url_check(url_id, status_code, h1, title, description):
             'description': description
         })
     conn.commit()
+
+
+def get_status_code(url_id):
+    sql = f"SELECT status_code FROM url_checks WHERE url_id = %(url_id)s ORDER BY created_at DESC LIMIT 1;"
+    with conn.cursor(cursor_factory=RealDictCursor) as curs:
+        curs.execute(sql, {'url_id': url_id})
+        return curs.fetchone()
