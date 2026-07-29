@@ -6,11 +6,13 @@ class HtmlParser:
     def __init__(self, url):
         self.url = url
         self.response = None
+        self.status_code = None
         self.resp = None
         self.soup = None
         self.error = None
         try:
-            self.response = requests.get()
+            self.response = requests.get(url)
+            self.status_code = self.response.status_code
             self.response.raise_for_status()  # Проверяем статус ответа
             self.resp = self.response.content
             self.soup = BeautifulSoup(self.resp, 'lxml')

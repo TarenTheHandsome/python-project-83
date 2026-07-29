@@ -71,7 +71,7 @@ def add_data_in_url_check(url_id, status_code, h1, title, description):
     conn.commit()
 
 
-def get_status_code(url_id):
+def get_status_code_db(url_id):
     sql = f"SELECT status_code FROM url_checks WHERE url_id = %(url_id)s ORDER BY created_at DESC LIMIT 1;"
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'url_id': url_id})

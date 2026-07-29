@@ -13,7 +13,7 @@ from page_analyzer.database import (
     get_all_urls,
     get_string_by_id,
     get_string_by_url_id,
-    get_status_code,
+    get_status_code_db,
 )
 
 
@@ -77,7 +77,7 @@ def get_url_list():
 @app.get('/url/<id>')
 #ОШИБКА
 def get_id(id):
-    status = get_status_code(id)
+    status = get_status_code_db(id)
     all_urls = get_string_by_id(id)
     return render_template('url.html', all_urls=all_urls, status=status)
 
@@ -85,7 +85,7 @@ def get_id(id):
 @app.get('/urls/<id>/checks')
 #ОШИБКА
 def get_check(id):
-    status = get_status_code(id)
+    status = get_status_code_db(id)
     all_checks = get_string_by_url_id(id)
     all_urls = get_string_by_id(id)
     return render_template('check_button.html', all_checks=all_checks, all_urls=all_urls, id=id, status=status)
@@ -94,10 +94,8 @@ def get_check(id):
 @app.post('/urls/<id>/checks')
 def post_check(id):
     name = get_url(id)
-    status = get_status_code(name)
-    # status = get_status_code(id)
     parser = HtmlParser(name)
-    add_data_in_url_check(id, status, parser.get_h1(), parser.get_title(), parser.get_description())
+    add_data_in_url_check(id, parser.status_code, parser.get_h1(), parser.get_title(), parser.get_description())
     return redirect(url_for('get_check', id=id))
 
 
