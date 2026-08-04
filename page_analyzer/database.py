@@ -50,11 +50,12 @@ def get_url(id):
 
 #Добавляет url в таблицу urls
 def add_data_into_urls(url):
-    sql = f'INSERT INTO urls (name) VALUES (%(url)s);'
+    sql = f'INSERT INTO urls (name) VALUES (%(url)s) RETURNING id;'
     with conn.cursor() as curs:
         curs.execute(sql, {'url': url})
-    conn.commit()
-
+        conn.commit()
+        return curs.fetchone()[0]
+    
 
 #Добавляет информацию в таблицу url_check
 def add_data_in_url_check(url_id, status_code, h1, title, description):

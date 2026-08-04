@@ -59,10 +59,11 @@ def post_url():
     if name_error:
         return render_template('errors/error.html'), 422
     #соединение с ДБ
-    add_data_into_urls(normalize_url(url))
-    flash('S', 'success')
-    resp = make_response(redirect(url_for('get_url_list')))
+    new_id = add_data_into_urls(normalize_url(url))
+    flash('Страница успешно добавлена', 'success')
+    resp = make_response(redirect(url_for('get_id', id=new_id)))
     return resp
+
 
 @app.route('/header')
 def header():
