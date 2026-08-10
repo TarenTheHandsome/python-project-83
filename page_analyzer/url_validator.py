@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+
 from page_analyzer.database import get_all_urls
 
 
@@ -17,6 +18,7 @@ def validator(url):
         return True
     return False
 
+
 def name_validator(url):
     errors = []
     url_name = normalize_url(url)
@@ -25,4 +27,3 @@ def name_validator(url):
         if url_name == u['name']:
             errors.append(True)
     return errors
-

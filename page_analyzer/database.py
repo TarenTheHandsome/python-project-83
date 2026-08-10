@@ -1,19 +1,21 @@
-import psycopg2
 import os
+
+import psycopg2
 from dotenv import load_dotenv
+from psycopg2.extras import RealDictCursor
+
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 conn = psycopg2.connect(DATABASE_URL)
-from psycopg2.extras import RealDictCursor
 
 
-#достает все записи из таблицы urls
+# retrieves all records from the 'urls' table
 def get_all_urls():
     sql = '''
     SELECT DISTINCT ON (urls.id)
-    urls.id, 
+    urls.id,
     urls.name,
-    url_checks.created_at, 
+    url_checks.created_at,
     url_checks.status_code
     FROM urls
     LEFT JOIN url_checks ON urls.id = url_checks.url_id
@@ -24,43 +26,72 @@ def get_all_urls():
         return curs.fetchall()
 
 
-#достает строчку по id из таблицы urls
-def get_string_by_id(id):
-    sql = f"SELECT * FROM urls WHERE id = %(id)s"
+# retrieves a row by id from the 'urls' table
+def find_url_by_id(id):
+    sql = '''
+    SELECT *
+    FROM urls
+    WHERE id = %(id)s'''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'id': id})
         return curs.fetchall()
 
 
-#достает строчку по url_id из таблицы url_checks
-def get_string_by_url_id(url_id):
-    sql = f"SELECT * FROM url_checks WHERE url_id = %(url_id)s"
+# retrieves a row by url_id from the 'url_checks' table
+def find_checks_by_url_id(url_id):
+    sql = '''
+    SELECT *
+    FROM url_checks
+    WHERE url_id = %(url_id)s
+    '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'url_id': url_id})
         return curs.fetchall()
 
 
-#достает название сайта по id из таблицы urls
+# retrieves the URL-name by id from the 'urls' table
 def get_url(id):
-    sql = f"SELECT name FROM urls WHERE id = %(id)s"
+    sql = '''
+    SELECT name
+    FROM urls
+    WHERE id = %(id)s
+    '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'id': id})
         return curs.fetchone().get('name')
 
 
-#Добавляет url в таблицу urls
-def add_data_into_urls(url):
-    sql = f'INSERT INTO urls (name) VALUES (%(url)s) RETURNING id;'
+# adds a URL to the 'urls' table
+def save_url(url):
+    sql = '''
+    INSERT INTO urls (name)
+    VALUES (%(url)s)
+    RETURNING id;
+    '''
     with conn.cursor() as curs:
         curs.execute(sql, {'url': url})
         conn.commit()
         return curs.fetchone()[0]
-    
 
-#Добавляет информацию в таблицу url_check
-def add_data_in_url_check(url_id, status_code, h1, title, description):
-    sql = f'INSERT INTO url_checks (url_id, status_code, h1, title, description)' \
-          f' VALUES (%(url_id)s, %(status_code)s, %(h1)s, %(title)s, %(description)s);' 
+
+# adds information to the 'url_check' table.
+def save_check(url_id, status_code, h1, title, description):
+    sql = '''
+    INSERT INTO url_checks (
+    url_id,
+    status_code,
+    h1,
+    title,
+    description
+    )
+    VALUES (
+    %(url_id)s,
+    %(status_code)s,
+    %(h1)s,
+    %(title)s,
+    %(description)s
+    );
+    '''
     with conn.cursor() as curs:
         curs.execute(sql, {
             'url_id': url_id,
@@ -72,8 +103,14 @@ def add_data_in_url_check(url_id, status_code, h1, title, description):
     conn.commit()
 
 
+# retrieves the status_code by url_id from the 'url_checks' table
 def get_status_code_db(url_id):
-    sql = f"SELECT status_code FROM url_checks WHERE url_id = %(url_id)s ORDER BY created_at DESC LIMIT 1;"
+    sql = '''
+    SELECT status_code
+    FROM url_checks
+    WHERE url_id = %(url_id)s
+    ORDER BY created_at DESC LIMIT 1;
+    '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'url_id': url_id})
         return curs.fetchone()
