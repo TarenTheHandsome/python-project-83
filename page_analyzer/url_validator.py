@@ -20,10 +20,10 @@ def validator(url):
 
 
 def name_validator(url):
-    errors = []
     url_name = normalize_url(url)
     all_urls = get_all_urls()
+
     for u in all_urls:
         if url_name == u['name']:
-            errors.append(True)
-    return errors
+            return True
+    return False

@@ -10,6 +10,17 @@
 </head>
 
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 <form action="/" method="get">
   {% include 'url.html'%}
     <div class="container">
@@ -44,7 +55,7 @@
                       </tbody>
                       {% endfor %}
               </div>    
-          
+           
           </div>            
         </div>
     </div>
