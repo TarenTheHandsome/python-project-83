@@ -62,6 +62,7 @@ def get_id(id):
     return render_template('url.html', all_urls=all_urls, status=status)
 
 
+# shows URL info with checking
 @app.get('/urls/<id>/checks')
 def get_check(id):
     status = get_status_code_db(id)
@@ -71,13 +72,13 @@ def get_check(id):
                            all_urls=all_urls, id=id, status=status)
 
 
-# неправильно записываются статус коды?
+# receives the URL info and sends it to the database('url_check' table)
 @app.post('/urls/<id>/checks')
 def post_check(id):
     url_name = get_url(id)
     if not url_name:
         flash('URL не найден', 'danger')
-        # return redirect(url_for('get_all_urls'))
+        return render_template('errors/error.html'), 422
     parser = HtmlParser(url_name)
     save_check(id, parser.status_code, parser.get_h1(),
                parser.get_title(), parser.get_description())
