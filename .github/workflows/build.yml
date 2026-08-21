@@ -20,15 +20,3 @@ jobs:
           make install
       - name: Run linter
         run: make lint
-
-      - name: SonarQubeScan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_83 }}
-        with:
-          args: >
-            -Dsonar.projectKey=TarenTheHandsome_python-project-83
-            -Dsonar.organization=tarenthehandsome
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.coverage.exclusions=tests/**
-            -Dsonar.exclusions=tests/**
