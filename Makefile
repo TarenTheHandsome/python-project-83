@@ -1,3 +1,6 @@
+setup:
+	install
+
 install:
 	uv sync
 
