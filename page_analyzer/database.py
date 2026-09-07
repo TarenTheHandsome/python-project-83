@@ -31,7 +31,8 @@ def find_url_by_id(id):
     sql = '''
     SELECT *
     FROM urls
-    WHERE id = %(id)s'''
+    WHERE id = %(id)s;
+    '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'id': id})
         return curs.fetchall()
@@ -42,7 +43,7 @@ def find_checks_by_url_id(url_id):
     sql = '''
     SELECT *
     FROM url_checks
-    WHERE url_id = %(url_id)s
+    WHERE url_id = %(url_id)s;
     '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'url_id': url_id})
@@ -54,7 +55,7 @@ def get_url(id):
     sql = '''
     SELECT name
     FROM urls
-    WHERE id = %(id)s
+    WHERE id = %(id)s;
     '''
     with conn.cursor(cursor_factory=RealDictCursor) as curs:
         curs.execute(sql, {'id': id})
