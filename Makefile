@@ -1,5 +1,4 @@
-setup:
-	install
+setup: install
 
 install:
 	uv sync
