@@ -40,6 +40,7 @@ def post_url():
     url = form_data.get('url')
     error = [validator(url), name_validator(url)]
     if True in error:
+        flash('Неверные данные', 'error')
         return render_template('errors/error.html'), 422
     id = save_url(normalize_url(url))
     flash('Страница успешно добавлена', 'success')
