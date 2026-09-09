@@ -12,7 +12,7 @@
 <body>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="flash-messages" role="alert">
+            <div class="flash-messages" role="alert" aria-live="polite">
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }}">
                         {{ message }}
